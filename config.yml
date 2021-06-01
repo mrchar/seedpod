@@ -1,0 +1,10 @@
+database:
+  type: postgres
+  postgres:
+    host: localhost
+    port: 5432
+    user: seedpod
+    password: seedpod-password
+    dbname: seedpod
+    sslmode: disable
+    timezone: Asia/Shanghai
