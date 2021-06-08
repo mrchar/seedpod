@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/mrchar/seedpod/account"
 	"net/http"
@@ -24,6 +25,11 @@ func NewUserHandler(manager *account.Manager) *UserHandler {
 type RegisterRequest struct {
 	AccountName string `json:"accountName" binding:"required"`
 	Password    string `json:"password" binding:"required"`
+}
+
+func (r RegisterRequest) ToJSON() []byte {
+	bytes, _ := json.Marshal(r)
+	return bytes
 }
 
 type RegisterResponse struct {
