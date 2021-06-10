@@ -7,7 +7,6 @@ import (
 	"github.com/mrchar/seedpod/common/db"
 	"github.com/mrchar/seedpod/common/jwt"
 
-	dJwt "github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -51,6 +50,23 @@ func (m *Manager) Register(name, password string) error {
 	return nil
 }
 
+type LoginClaims struct {
+	Issuer    string   `json:"iss"`
+	Name      string   `json:"sub"`
+	Roles     []string `json:"roles"`
+	ExpiresAt int64    `json:"exp"`
+}
+
+func (c *LoginClaims) Valid() error {
+	if c.Issuer != "seedpod" {
+		return errors.New("使用了错误的令牌")
+	}
+	if c.ExpiresAt < time.Now().Unix() {
+		return errors.New("令牌已经过期")
+	}
+	return nil
+}
+
 // Login 登录账户
 func (m *Manager) Login(name, password string) (string, error) {
 	account, err := m.getAccount(name)
@@ -69,11 +85,17 @@ func (m *Manager) Login(name, password string) (string, error) {
 	}
 
 	// TODO: issuer
-	token, err := m.iver.Issue(dJwt.MapClaims{
-		"iss":   "seedpod",
-		"sub":   account.Name,
-		"roles": account.Roles,
-		"exp":   time.Now().Add(8 * time.Hour).Unix(),
+	token, err := m.iver.Issue(&LoginClaims{
+		Issuer: "seedpod",
+		Name:   account.Name,
+		Roles: func() []string {
+			var roles []string
+			for _, role := range account.Roles {
+				roles = append(roles, role.Name)
+			}
+			return roles
+		}(),
+		ExpiresAt: time.Now().Add(8 * time.Hour).Unix(),
 	})
 	if err != nil {
 		return "", err
