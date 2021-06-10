@@ -1,6 +1,6 @@
 package test
 
-import "github.com/mrchar/seedpod/db"
+import "github.com/mrchar/seedpod/common/db"
 
 func DropTables() error {
 	defaultDB := db.Default()

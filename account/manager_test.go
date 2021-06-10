@@ -16,9 +16,10 @@ func TestManager(t *testing.T) {
 			convey.So(err, convey.ShouldBeNil)
 
 			convey.Convey("在用户不存在的情况下，登录，会返回错误", func() {
-				err := manager.Login("account", "password")
+				token, err := manager.Login("account", "password")
 				convey.Println(err)
 				convey.So(err, convey.ShouldNotBeNil)
+				convey.So(token, convey.ShouldBeEmpty)
 			})
 
 			convey.Convey("在manager创建的情况下，注册账号，不会返回错误", func() {
@@ -32,8 +33,10 @@ func TestManager(t *testing.T) {
 				})
 
 				convey.Convey("在用户已经存在的情况下，登录，不会返回错误", func() {
-					err := manager.Login("account", "password")
+					token, err := manager.Login("account", "password")
 					convey.So(err, convey.ShouldBeNil)
+					convey.So(token, convey.ShouldNotBeEmpty)
+					convey.Printf("Token: %s", token)
 				})
 			})
 

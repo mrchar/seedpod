@@ -2,7 +2,12 @@ package account
 
 import (
 	"encoding/base64"
-	"github.com/mrchar/seedpod/db"
+	"time"
+
+	"github.com/mrchar/seedpod/common/db"
+	"github.com/mrchar/seedpod/common/jwt"
+
+	dJwt "github.com/dgrijalva/jwt-go"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -12,20 +17,21 @@ var defaultManager *Manager
 
 // Manager 用户管理Account
 type Manager struct {
-	db *gorm.DB
+	db   *gorm.DB
+	iver *jwt.IssueVerifier
 }
 
 // DefaultManager 使用默认的数据库创建Manager
 func DefaultManager() *Manager {
 	if defaultManager == nil {
-		defaultManager = NewManager(db.Default())
+		defaultManager = NewManager(db.Default(), jwt.Default())
 	}
 	return defaultManager
 }
 
 // NewManager 新建Manager
-func NewManager(db *gorm.DB) *Manager {
-	return &Manager{db: db}
+func NewManager(db *gorm.DB, iver *jwt.IssueVerifier) *Manager {
+	return &Manager{db: db, iver: iver}
 }
 
 func (m *Manager) AutoMigrate() error {
@@ -46,22 +52,34 @@ func (m *Manager) Register(name, password string) error {
 }
 
 // Login 登录账户
-func (m *Manager) Login(name, password string) error {
+func (m *Manager) Login(name, password string) (string, error) {
 	account, err := m.getAccount(name)
 	if err != nil {
-		return errors.Wrap(err, "用户名或密码错误")
+		return "", errors.Wrap(err, "用户名或密码错误")
 	}
 
 	hashedPassword, err := base64.RawStdEncoding.DecodeString(account.Password)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = bcrypt.CompareHashAndPassword(hashedPassword, []byte(password))
 	if err != nil {
-		return errors.Wrap(err, "用户名或密码错误")
+		return "", errors.Wrap(err, "用户名或密码错误")
 	}
-	return nil
+
+	// TODO: issuer
+	token, err := m.iver.Issue(dJwt.MapClaims{
+		"iss":   "seedpod",
+		"sub":   account.Name,
+		"roles": account.Roles,
+		"exp":   time.Now().Add(8 * time.Hour).Unix(),
+	})
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
 }
 
 func (m *Manager) addAccount(name, password string) (*Account, error) {

@@ -59,6 +59,7 @@ func TestUserHandler(t *testing.T) {
 				)
 				mockServer.ServeHTTP(w, r)
 				convey.So(w.Code, convey.ShouldEqual, http.StatusOK)
+				convey.Printf("Resp: %s", w.Body.String())
 			})
 		})
 	})

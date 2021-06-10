@@ -2,7 +2,7 @@ package account
 
 import (
 	"encoding/base64"
-	"github.com/mrchar/seedpod/db"
+	"github.com/mrchar/seedpod/common/db"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )

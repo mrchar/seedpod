@@ -1,6 +1,6 @@
 package account
 
-import "github.com/mrchar/seedpod/db"
+import "github.com/mrchar/seedpod/common/db"
 
 type Role struct {
 	db.Model

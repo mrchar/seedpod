@@ -57,7 +57,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Message string `json:"message,omitempty"`
+	Token string `json:"token"`
 }
 
 func (u *UserHandler) Login(c *gin.Context) {
@@ -67,10 +67,11 @@ func (u *UserHandler) Login(c *gin.Context) {
 		return
 	}
 
-	if err := u.manager.Login(param.AccountName, param.Password); err != nil {
+	token, err := u.manager.Login(param.AccountName, param.Password)
+	if err != nil {
 		c.AbortWithError(http.StatusUnauthorized, err)
 		return
 	}
 
-	c.JSON(http.StatusOK, LoginResponse{"ok"})
+	c.JSON(http.StatusOK, LoginResponse{token})
 }
