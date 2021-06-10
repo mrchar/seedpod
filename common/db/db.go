@@ -34,35 +34,41 @@ func Default() *gorm.DB {
 }
 
 func New(config Config) (db *gorm.DB, err error) {
-	gormConfig := &gorm.Config{
-		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   config.Gorm.TablePrefix,
-			SingularTable: config.Gorm.SingularTable,
-		},
-	}
 	var dsn string
+	var dialector gorm.Dialector
 	switch strings.ToLower(config.Type) {
 	case TypePostgres:
 		dsn, err = config.PostgresConfig.Datasource()
 		if err != nil {
 			return nil, err
 		}
-		db, err = gorm.Open(postgres.Open(dsn), gormConfig)
+		dialector = postgres.Open(dsn)
 	case TypeMysql:
 		dsn, err = config.MysqlConfig.Datasource()
 		if err != nil {
 			return nil, err
 		}
-		db, err = gorm.Open(mysql.Open(dsn), gormConfig)
+		dialector = mysql.Open(dsn)
 	case TypeSqlite:
 		dsn, err = config.Sqlite.Datasource()
 		if err != nil {
 			return nil, err
 		}
-		db, err = gorm.Open(sqlite.Open(dsn), gormConfig)
+		dialector = sqlite.Open(dsn)
+
 	default:
 		return nil, errors.New("不支持的数据库")
 	}
 
-	return db, err
+	db, err = gorm.Open(dialector, &gorm.Config{
+		NamingStrategy: schema.NamingStrategy{
+			TablePrefix:   config.Gorm.TablePrefix,
+			SingularTable: config.Gorm.SingularTable,
+		},
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return db, nil
 }
