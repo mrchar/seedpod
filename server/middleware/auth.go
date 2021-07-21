@@ -2,8 +2,8 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/mrchar/seedpod/account"
 	"github.com/mrchar/seedpod/common/jwt"
+	"github.com/mrchar/seedpod/provider/local"
 	"net/http"
 	"strings"
 )
@@ -41,7 +41,7 @@ func (a *AuthMiddleware) VerifyLogin(c *gin.Context) {
 	}
 
 	token = strings.TrimSpace(split[1])
-	claims := &account.LoginClaims{}
+	claims := &local.LoginClaims{}
 	t, err := a.iver.Verify(token, claims)
 	if err != nil {
 		// TODO: 处理具体错误
@@ -49,7 +49,7 @@ func (a *AuthMiddleware) VerifyLogin(c *gin.Context) {
 		return
 	}
 
-	claims, ok := t.Claims.(*account.LoginClaims)
+	claims, ok := t.Claims.(*local.LoginClaims)
 	if !ok {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, AuthenticationResponse{"使用了错误的令牌"})
 		return

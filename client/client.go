@@ -8,6 +8,11 @@ import (
 	"net/http"
 )
 
+const (
+	RegistrationAPI = "/api/register"
+	LoginAPI        = "/api/login"
+)
+
 type Client struct {
 	baseURL string
 	c       *http.Client
@@ -21,7 +26,7 @@ func New(baseURL string) *Client {
 }
 func (c *Client) Register(accountName, password string) error {
 	request := handler.RegisterRequest{AccountName: accountName, Password: password}
-	response, err := c.c.Post(c.baseURL+"/register", "application/json", bytes.NewReader(request.ToJSON()))
+	response, err := c.c.Post(c.baseURL+RegistrationAPI, "application/json", bytes.NewReader(request.ToJSON()))
 	if err != nil {
 		return err
 	}
@@ -44,7 +49,7 @@ func (c *Client) Register(accountName, password string) error {
 
 func (c *Client) Login(accountName, password string) error {
 	request := handler.RegisterRequest{AccountName: accountName, Password: password}
-	response, err := c.c.Post(c.baseURL+"/login", "application/json", bytes.NewReader(request.ToJSON()))
+	response, err := c.c.Post(c.baseURL+LoginAPI, "application/json", bytes.NewReader(request.ToJSON()))
 	if err != nil {
 		return err
 	}
