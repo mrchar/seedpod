@@ -3,7 +3,6 @@ version: "3"
 services:
   db:
     image: postgres:13.3
-    container_name: db
     environment:
       POSTGRES_DB: seedpod
       POSTGRES_USER: seedpod
@@ -15,5 +14,15 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+
+  api:
+    image: seedpod:latest
+    command: [ "/usr/local/bin/seedpod", "serve", "--config", "./config.yml" ]
+    volumes:
+      - ./config.yml:/config.yml
+    ports:
+      - 8080:8080
+    depends_on:
+      - db
 
 

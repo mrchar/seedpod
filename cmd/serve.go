@@ -16,9 +16,11 @@ limitations under the License.
 package cmd
 
 import (
+	"github.com/gin-gonic/gin"
 	"github.com/mrchar/seedpod/server"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // serveCmd represents the serve command
@@ -32,6 +34,7 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
+		setMode()
 		server := server.Default()
 		if err := server.Start(); err != nil {
 			logrus.Fatal(err)
@@ -51,4 +54,16 @@ func init() {
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
 	// serveCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+}
+
+func setMode() {
+	debug := viper.GetBool("debug")
+	logrus.Infof("DEBUG: %t", debug)
+	if debug {
+		logrus.SetLevel(logrus.DebugLevel)
+		gin.SetMode(gin.DebugMode)
+		return
+	}
+	logrus.SetLevel(logrus.InfoLevel)
+	gin.SetMode(gin.ReleaseMode)
 }

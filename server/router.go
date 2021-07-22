@@ -9,11 +9,14 @@ import (
 )
 
 var (
-	userHandler        = handler.DefaultUserHandler()
-	applicationHandler = handler.DefaultApplicationHandler()
+	userHandler        *handler.UserHandler
+	applicationHandler *handler.ApplicationHandler
 )
 
 func newRouter() http.Handler {
+	userHandler = handler.DefaultUserHandler()
+	applicationHandler = handler.DefaultApplicationHandler()
+
 	router := gin.Default()
 	{
 		userGroup := router.Group("/user")

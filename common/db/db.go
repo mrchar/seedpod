@@ -2,15 +2,15 @@ package db
 
 import (
 	"errors"
-	"github.com/sirupsen/logrus"
-	"gorm.io/gorm/schema"
 	"strings"
 
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
+	"gorm.io/gorm/schema"
 )
 
 var defaultDB *gorm.DB

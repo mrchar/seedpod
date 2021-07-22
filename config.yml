@@ -1,10 +1,14 @@
+server:
+  address: localhost
+  port: 8080
 database:
   type: postgres
   postgres:
-    host: localhost
+    host: db
     port: 5432
     user: seedpod
     password: seedpod-password
     dbname: seedpod
     sslmode: disable
     timezone: Asia/Shanghai
+debug: true
