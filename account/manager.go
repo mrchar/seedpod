@@ -56,6 +56,17 @@ func (m *Manager) AddAccount(account Account) (*Account, error) {
 	return &account, nil
 }
 
+// ListAllAccounts 获取所有的用户
+// TODO: 分页
+func (m *Manager) ListAllAccounts() ([]Account, error) {
+	var accounts []Account
+	result := m.db.Find(&accounts)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+	return accounts, nil
+}
+
 // GetAccount 根据账户名获取账户
 func (m *Manager) GetAccount(name string) (*Account, error) {
 	var account Account
@@ -71,22 +82,59 @@ func (m *Manager) GetAccount(name string) (*Account, error) {
 // AccountExists 检查账户名对应的账户是否存在
 func (m *Manager) AccountExists(name string) bool {
 	var count int64
-	if m.db.Where("name = ?", name).Count(&count); count > 0 {
+	if m.db.Model(new(Account)).Where("name = ?", name).Count(&count); count > 0 {
 		return true
 	}
 	return false
 }
 
-// AddRole 添加角色
-func (m *Manager) AddRole(name string) (*Role, error) {
-	role := Role{
-		Name: name,
+func (m *Manager) RegisterRole(name string, description string) error {
+	// 检查名称是否可用
+	if m.RoleExists(name) {
+		return errors.New("同名角色已经存在")
 	}
 
+	role := Role{
+		Name:        name,
+		Description: description,
+	}
+
+	// 添加角色
+	_, err := m.AddRole(role)
+	if err != nil {
+		return errors.Wrap(err, "持久化角色时发生错误")
+	}
+	return nil
+}
+
+// AddRole 添加角色
+func (m *Manager) AddRole(role Role) (*Role, error) {
 	result := m.db.Create(&role)
 	if err := result.Error; err != nil {
 		return nil, err
 	}
 
 	return &role, nil
+}
+
+func (m *Manager) GetRole(name string) (*Role, error) {
+	var role Role
+	result := m.db.Where("name = ?", name).First(&role)
+	if err := result.Error; err != nil {
+		return nil, err
+	}
+	return &role, nil
+}
+
+func (m *Manager) RoleExists(name string) bool {
+	var count int64
+	if m.db.Model(new(Role)).Where("name = ?", name).Count(&count); count > 0 {
+		return true
+	}
+	return false
+}
+
+func (m *Manager) DeleteRole(name string) error {
+	result := m.db.Where("name = ?", name).Delete(new(Role))
+	return result.Error
 }
